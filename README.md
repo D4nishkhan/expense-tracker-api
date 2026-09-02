@@ -24,7 +24,6 @@ The application provides a RESTful API for managing expenses and a web-based fro
 
 ## Project Structure
 
-```text
 c:\FastAPI-Basics\
 ├── app/
 │   ├── __init__.py
@@ -47,6 +46,7 @@ c:\FastAPI-Basics\
 ├── requirements.txt
 ├── README.md
 └── main.py
+
 Expense Fields
 Field	Type	Required	Description
 id	int	auto	Primary key
@@ -127,3 +127,12 @@ Backend: Render Web Service
 Production Database: Render PostgreSQL
 
 The live application can be accessed using the links in the Live Demo section above.
+
+## Important: API Configuration
+
+Before using the frontend, make sure the **API Base URL** is set to the deployed backend URL.
+
+Use:
+
+https://expense-tracker-api-30jh.onrender.com
+![API URL Configuration](screenshots/api-url-config.png)
