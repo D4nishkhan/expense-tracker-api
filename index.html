@@ -590,7 +590,7 @@
   $('btnCheckConn').addEventListener('click', checkConnection);
 
   apiBaseInput.addEventListener('change', () => {
-    state.apiBase = apiBaseInput.value.trim() || 'http://127.0.0.1:8000';
+    state.apiBase = apiBaseInput.value.trim() || 'https://expense-tracker-api-30jh.onrender.com';
     localStorage.setItem('ledger_api_base', state.apiBase);
     checkConnection();
     loadAll();
