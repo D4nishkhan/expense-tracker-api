@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger — Expense Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --paper-raised:#F3EFE5;
+    --ink:#211F1C;
+    --muted:#6B6558;
+    --green:#2F5233;
+    --green-dark:#233F27;
+    --rule:#DDD6C8;
+    --rule-strong:#C7BEA9;
+    --brick:#A23E2F;
+    --brick-dark:#832F23;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    line-height:1.5;
+  }
+
+  ::selection{ background:var(--green); color:var(--paper); }
+
+  h1,h2,h3{
+    font-family:'Source Serif 4', serif;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    font-variant-numeric:tabular-nums;
+  }
+
+  a{ color:var(--green); }
+
+  button{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  input, select, textarea{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+
+  /* ---------- App shell ---------- */
+
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:28px 40px 22px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+
+  .masthead-title h1{
+    font-size:32px;
+  }
+
+  .masthead-title p{
+    margin:4px 0 0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .masthead-tally{
+    text-align:right;
+  }
+
+  .masthead-tally .label{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  .masthead-tally .amount{
+    font-size:30px;
+    font-weight:500;
+  }
+
+  .masthead-tally .count{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:0;
+    align-items:start;
+  }
+
+  @media (max-width: 860px){
+    .layout{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- Sidebar ---------- */
+
+  .sidebar{
+    border-right:1px solid var(--rule);
+    padding:28px 28px 60px;
+    min-height:70vh;
+  }
+
+  @media (max-width: 860px){
+    .sidebar{ border-right:none; border-bottom:1px solid var(--rule); min-height:auto; }
+  }
+
+  .sidebar-section{ margin-bottom:34px; }
+
+  .sidebar-heading{
+    font-size:11px;
+    color:var(--muted);
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .field{ margin-bottom:14px; }
+
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+
+  .field input,
+  .field textarea{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--rule-strong);
+    border-radius:2px;
+    background:var(--paper);
+  }
+
+  .field input:focus,
+  .field textarea:focus{
+    outline:2px solid var(--green);
+    outline-offset:1px;
+    border-color:var(--green);
+  }
+
+  .field textarea{ resize:vertical; min-height:56px; }
+
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:9px 16px;
+    border:1px solid var(--green);
+    border-radius:2px;
+    background:var(--green);
+    color:var(--paper);
+    font-weight:500;
+    transition:background 120ms ease, transform 60ms ease;
+  }
+  .btn:hover{ background:var(--green-dark); }
+  .btn:active{ transform:translateY(1px); }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--rule-strong);
+  }
+  .btn-ghost:hover{ border-color:var(--ink); background:var(--paper-raised); }
+
+  .btn-block{ width:100%; }
+
+  .btn-text{
+    background:none;
+    border:none;
+    color:var(--muted);
+    padding:2px 4px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .btn-text:hover{ color:var(--ink); }
+
+  .btn-danger-text{
+    background:none;
+    border:none;
+    color:var(--brick);
+    padding:2px 4px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .btn-danger-text:hover{ color:var(--brick-dark); }
+
+  .connection-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--rule-strong);
+    display:inline-block;
+  }
+  .connection-dot.ok{ background:var(--green); }
+  .connection-dot.bad{ background:var(--brick); }
+
+  .conn-status{
+    display:flex; align-items:center; gap:6px;
+    font-size:12px; color:var(--muted); margin-top:8px;
+  }
+
+  /* ---------- Main / ledger ---------- */
+
+  .main{ padding:28px 40px 60px; }
+
+  .toolbar{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--rule);
+  }
+
+  .toolbar .field{ margin-bottom:0; min-width:150px; }
+  .toolbar .field.grow{ flex:1; min-width:180px; }
+
+  .banner{
+    padding:10px 14px;
+    border-left:3px solid var(--brick);
+    background:#F7EDE9;
+    color:var(--brick-dark);
+    font-size:13px;
+    margin-bottom:18px;
+    border-radius:2px;
+  }
+  .banner.info{
+    border-left-color:var(--green);
+    background:#EEF2EC;
+    color:var(--green-dark);
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+  }
+
+  thead th{
+    text-align:left;
+    font-size:11px;
+    color:var(--muted);
+    font-weight:500;
+    padding:0 10px 10px;
+    border-bottom:1px solid var(--ink);
+  }
+  thead th.num{ text-align:right; }
+
+  tbody td{
+    padding:12px 10px;
+    border-bottom:1px solid var(--rule);
+    vertical-align:top;
+    font-size:14px;
+  }
+
+  tbody tr:hover{ background:var(--paper-raised); }
+
+  td.num{ text-align:right; white-space:nowrap; }
+
+  td.title-cell .desc{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:2px;
+  }
+
+  .category-tag{
+    display:inline-block;
+    font-size:11px;
+    color:var(--green-dark);
+    border:1px solid var(--rule-strong);
+    padding:2px 7px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+
+  .row-actions{ white-space:nowrap; }
+
+  .empty-state{
+    padding:60px 20px;
+    text-align:center;
+    color:var(--muted);
+  }
+  .empty-state h3{ color:var(--ink); margin-bottom:6px; font-size:18px; }
+
+  .pagination{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+    font-size:13px;
+    color:var(--muted);
+  }
+  .pagination .controls{ display:flex; gap:8px; align-items:center; }
+
+  /* ---------- Edit row (inline) ---------- */
+
+  .edit-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    align-items:start;
+  }
+  .edit-grid input{
+    width:100%;
+    padding:6px 8px;
+    border:1px solid var(--rule-strong);
+    border-radius:2px;
+    font-size:13px;
+  }
+  .edit-grid .edit-actions{
+    grid-column:1 / -1;
+    display:flex;
+    gap:10px;
+    margin-top:4px;
+  }
+
+  .field-error{
+    color:var(--brick);
+    font-size:11px;
+    margin-top:3px;
+  }
+
+  .visually-hidden{
+    position:absolute; width:1px; height:1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-title">
+    <h1>Ledger</h1>
+    <p>A plain record of what you've spent.</p>
+  </div>
+  <div class="masthead-tally">
+    <div class="label">RUNNING TOTAL</div>
+    <div class="amount mono" id="tallyAmount">$0.00</div>
+    <div class="count" id="tallyCount">0 entries</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <h2 class="sidebar-heading">CONNECTION</h2>
+      <div class="field">
+        <label for="apiBase">API base URL</label>
+        <input type="text" id="apiBase" value="http://127.0.0.1:8000" autocomplete="off" spellcheck="false" />
+      </div>
+      <button class="btn btn-ghost btn-block" id="btnCheckConn">Check connection</button>
+      <div class="conn-status" id="connStatus"><span class="connection-dot" id="connDot"></span><span id="connText">Not checked yet</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2 class="sidebar-heading">RECORD AN ENTRY</h2>
+      <form id="createForm" novalidate>
+        <div class="field">
+          <label for="c_title">Title</label>
+          <input type="text" id="c_title" maxlength="200" required />
+          <div class="field-error" id="err_c_title"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="c_amount">Amount</label>
+            <input type="number" id="c_amount" step="0.01" min="0.01" required />
+            <div class="field-error" id="err_c_amount"></div>
+          </div>
+          <div class="field">
+            <label for="c_date">Date</label>
+            <input type="date" id="c_date" required />
+            <div class="field-error" id="err_c_date"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="c_category">Category</label>
+          <input type="text" id="c_category" maxlength="100" required placeholder="e.g. Food, Transport" />
+          <div class="field-error" id="err_c_category"></div>
+        </div>
+        <div class="field">
+          <label for="c_description">Notes (optional)</label>
+          <textarea id="c_description" maxlength="2000"></textarea>
+          <div class="field-error" id="err_c_description"></div>
+        </div>
+        <button type="submit" class="btn btn-block" id="btnCreate">Record entry</button>
+      </form>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div id="bannerHost"></div>
+
+    <div class="toolbar">
+      <div class="field grow">
+        <label for="f_category">Category</label>
+        <input type="text" id="f_category" placeholder="All categories" />
+      </div>
+      <div class="field">
+        <label for="f_start">From</label>
+        <input type="date" id="f_start" />
+      </div>
+      <div class="field">
+        <label for="f_end">To</label>
+        <input type="date" id="f_end" />
+      </div>
+      <div class="field">
+        <label for="f_limit">Per page</label>
+        <input type="number" id="f_limit" min="1" max="100" value="10" style="width:80px" />
+      </div>
+      <button class="btn btn-ghost" id="btnApplyFilters">Apply</button>
+      <button class="btn-text" id="btnClearFilters" type="button">Clear</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Entry</th>
+          <th>Category</th>
+          <th class="num">Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div id="emptyState" class="empty-state" style="display:none">
+      <h3>Nothing recorded here</h3>
+      <p>No expenses match these filters. Try widening the date range, or record a new entry.</p>
+    </div>
+
+    <div class="pagination">
+      <div id="pageInfo">Showing 0–0</div>
+      <div class="controls">
+        <button class="btn btn-ghost" id="btnPrev">← Previous</button>
+        <button class="btn btn-ghost" id="btnNext">Next →</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- State ----------
+  const state = {
+    apiBase: localStorage.getItem('ledger_api_base') || 'http://127.0.0.1:8000',
+    filters: { category:'', start_date:'', end_date:'' },
+    skip: 0,
+    limit: 10,
+    editingId: null,
+  };
+
+  // ---------- DOM refs ----------
+  const $ = (id) => document.getElementById(id);
+  const apiBaseInput = $('apiBase');
+  const connDot = $('connDot');
+  const connText = $('connText');
+  const bannerHost = $('bannerHost');
+  const tableBody = $('tableBody');
+  const emptyState = $('emptyState');
+  const pageInfo = $('pageInfo');
+  const tallyAmount = $('tallyAmount');
+  const tallyCount = $('tallyCount');
+
+  apiBaseInput.value = state.apiBase;
+
+  // ---------- Helpers ----------
+  function apiUrl(path){
+    return state.apiBase.replace(/\/+$/,'') + path;
+  }
+
+  function money(n){
+    return '₹' + Number(n).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function showBanner(message, type){
+    bannerHost.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'banner' + (type === 'info' ? ' info' : '');
+    div.textContent = message;
+    bannerHost.appendChild(div);
+    if (type === 'info'){
+      setTimeout(() => { if (bannerHost.contains(div)) bannerHost.removeChild(div); }, 3500);
+    }
+  }
+
+  function clearBanner(){ bannerHost.innerHTML = ''; }
+
+  function clearFieldErrors(prefix){
+    ['title','amount','category','date','description'].forEach(f => {
+      const el = $(prefix + f);
+      if (el) el.textContent = '';
+    });
+  }
+
+  // Map FastAPI 422 detail array onto form field errors.
+  function applyValidationErrors(detail, prefix){
+    if (!Array.isArray(detail)) return false;
+    let matched = false;
+    detail.forEach(err => {
+      const field = err.loc && err.loc[err.loc.length - 1];
+      const el = $(prefix + field);
+      if (el){
+        el.textContent = err.msg;
+        matched = true;
+      }
+    });
+    return matched;
+  }
+
+  async function apiFetch(path, options){
+    let res;
+    try{
+      res = await fetch(apiUrl(path), Object.assign({
+        headers: { 'Content-Type': 'application/json' }
+      }, options));
+    }catch(e){
+      throw { network:true, message:'Could not reach the API at ' + state.apiBase + '. Is the server running, and does it allow requests from this page (CORS)?' };
+    }
+    if (res.status === 204) return null;
+    let body = null;
+    try{ body = await res.json(); }catch(e){ /* no body */ }
+    if (!res.ok){
+      throw { status:res.status, body };
+    }
+    return body;
+  }
+
+  // ---------- Connection check ----------
+  async function checkConnection(){
+    connDot.className = 'connection-dot';
+    connText.textContent = 'Checking…';
+    try{
+      await apiFetch('/', {});
+      connDot.className = 'connection-dot ok';
+      connText.textContent = 'Connected to ' + state.apiBase;
+    }catch(e){
+      connDot.className = 'connection-dot bad';
+      connText.textContent = e.message || ('Could not reach ' + state.apiBase);
+    }
+  }
+
+  $('btnCheckConn').addEventListener('click', checkConnection);
+
+  apiBaseInput.addEventListener('change', () => {
+    state.apiBase = apiBaseInput.value.trim() || 'http://127.0.0.1:8000';
+    localStorage.setItem('ledger_api_base', state.apiBase);
+    checkConnection();
+    loadAll();
+  });
+
+  // ---------- Load list + total ----------
+  function buildQuery(extra){
+    const params = new URLSearchParams();
+    if (state.filters.category) params.set('category', state.filters.category);
+    if (state.filters.start_date) params.set('start_date', state.filters.start_date);
+    if (state.filters.end_date) params.set('end_date', state.filters.end_date);
+    Object.assign(extra || {}, {});
+    if (extra){
+      Object.keys(extra).forEach(k => params.set(k, extra[k]));
+    }
+    return params.toString();
+  }
+
+  async function loadTotal(){
+    try{
+      const qs = buildQuery();
+      const data = await apiFetch('/expenses/total' + (qs ? '?' + qs : ''), {});
+      tallyAmount.textContent = money(data.total);
+      tallyCount.textContent = data.count + (data.count === 1 ? ' entry' : ' entries');
+    }catch(e){
+      tallyAmount.textContent = '—';
+      tallyCount.textContent = 'unavailable';
+    }
+  }
+
+  async function loadList(){
+    const qs = buildQuery({ skip: state.skip, limit: state.limit });
+    try{
+      const data = await apiFetch('/expenses?' + qs, {});
+      renderRows(data);
+      pageInfo.textContent = data.length === 0
+        ? 'Showing 0–0'
+        : `Showing ${state.skip + 1}–${state.skip + data.length}`;
+      $('btnPrev').disabled = state.skip === 0;
+      $('btnNext').disabled = data.length < state.limit;
+    }catch(e){
+      renderRows([]);
+      if (e.network){
+        showBanner(e.message);
+      } else {
+        showBanner('Could not load expenses (status ' + (e.status || '?') + ').');
+      }
+    }
+  }
+
+  function loadAll(){
+    loadList();
+    loadTotal();
+  }
+
+  // ---------- Rendering ----------
+  function renderRows(rows){
+    tableBody.innerHTML = '';
+    emptyState.style.display = rows.length === 0 ? 'block' : 'none';
+
+    rows.forEach(exp => {
+      if (state.editingId === exp.id){
+        tableBody.appendChild(renderEditRow(exp));
+      } else {
+        tableBody.appendChild(renderRow(exp));
+      }
+    });
+  }
+
+  function renderRow(exp){
+    const tr = document.createElement('tr');
+
+    const tdDate = document.createElement('td');
+    tdDate.className = 'mono';
+    tdDate.textContent = exp.date;
+
+    const tdTitle = document.createElement('td');
+    tdTitle.className = 'title-cell';
+    const strong = document.createElement('div');
+    strong.textContent = exp.title;
+    tdTitle.appendChild(strong);
+    if (exp.description){
+      const desc = document.createElement('span');
+      desc.className = 'desc';
+      desc.textContent = exp.description;
+      tdTitle.appendChild(desc);
+    }
+
+    const tdCategory = document.createElement('td');
+    const tag = document.createElement('span');
+    tag.className = 'category-tag';
+    tag.textContent = exp.category;
+    tdCategory.appendChild(tag);
+
+    const tdAmount = document.createElement('td');
+    tdAmount.className = 'num mono';
+    tdAmount.textContent = money(exp.amount);
+
+    const tdActions = document.createElement('td');
+    tdActions.className = 'row-actions';
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn-text';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', () => { state.editingId = exp.id; loadList(); });
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-danger-text';
+    delBtn.textContent = 'Delete';
+    delBtn.addEventListener('click', () => deleteExpense(exp));
+    tdActions.appendChild(editBtn);
+    tdActions.appendChild(document.createTextNode(' '));
+    tdActions.appendChild(delBtn);
+
+    tr.appendChild(tdDate);
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdCategory);
+    tr.appendChild(tdAmount);
+    tr.appendChild(tdActions);
+    return tr;
+  }
+
+  function renderEditRow(exp){
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 5;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'edit-grid';
+    wrap.innerHTML = `
+      <div>
+        <input type="text" id="e_title" value="${escapeAttr(exp.title)}" maxlength="200" />
+        <div class="field-error" id="err_e_title"></div>
+      </div>
+      <div>
+        <input type="number" id="e_amount" value="${exp.amount}" step="0.01" min="0.01" />
+        <div class="field-error" id="err_e_amount"></div>
+      </div>
+      <div>
+        <input type="text" id="e_category" value="${escapeAttr(exp.category)}" maxlength="100" />
+        <div class="field-error" id="err_e_category"></div>
+      </div>
+      <div>
+        <input type="date" id="e_date" value="${exp.date}" />
+        <div class="field-error" id="err_e_date"></div>
+      </div>
+      <div>
+        <input type="text" id="e_description" value="${escapeAttr(exp.description || '')}" maxlength="2000" placeholder="Notes" />
+        <div class="field-error" id="err_e_description"></div>
+      </div>
+      <div class="edit-actions">
+        <button class="btn" id="e_save">Save changes</button>
+        <button class="btn btn-ghost" id="e_cancel" type="button">Cancel</button>
+      </div>
+    `;
+    td.appendChild(wrap);
+    tr.appendChild(td);
+
+    setTimeout(() => {
+      $('e_save').addEventListener('click', () => saveEdit(exp.id));
+      $('e_cancel').addEventListener('click', () => { state.editingId = null; loadList(); });
+    }, 0);
+
+    return tr;
+  }
+
+  function escapeAttr(str){
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  // ---------- Create ----------
+  $('createForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearFieldErrors('err_c_');
+    clearBanner();
+
+    const payload = {
+      title: $('c_title').value.trim(),
+      amount: parseFloat($('c_amount').value),
+      category: $('c_category').value.trim(),
+      date: $('c_date').value,
+      description: $('c_description').value.trim() || null,
+    };
+
+    $('btnCreate').disabled = true;
+    try{
+      await apiFetch('/expenses', { method:'POST', body: JSON.stringify(payload) });
+      $('createForm').reset();
+      showBanner('Entry recorded.', 'info');
+      state.skip = 0;
+      loadAll();
+    }catch(err){
+      if (err.status === 422 && err.body){
+        const matched = applyValidationErrors(err.body.detail, 'err_c_');
+        if (!matched) showBanner('Could not save that entry — check the fields and try again.');
+      } else if (err.network){
+        showBanner(err.message);
+      } else {
+        showBanner('Could not save that entry (status ' + (err.status || '?') + ').');
+      }
+    }finally{
+      $('btnCreate').disabled = false;
+    }
+  });
+
+  // ---------- Update ----------
+  async function saveEdit(id){
+    clearFieldErrors('err_e_');
+    const payload = {
+      title: $('e_title').value.trim(),
+      amount: parseFloat($('e_amount').value),
+      category: $('e_category').value.trim(),
+      date: $('e_date').value,
+      description: $('e_description').value.trim() || null,
+    };
+    try{
+      await apiFetch('/expenses/' + id, { method:'PUT', body: JSON.stringify(payload) });
+      state.editingId = null;
+      showBanner('Entry updated.', 'info');
+      loadAll();
+    }catch(err){
+      if (err.status === 422 && err.body){
+        applyValidationErrors(err.body.detail, 'err_e_');
+      } else if (err.status === 404){
+        showBanner('That entry no longer exists.');
+        state.editingId = null;
+        loadAll();
+      } else {
+        showBanner('Could not update that entry.');
+      }
+    }
+  }
+
+  // ---------- Delete ----------
+  async function deleteExpense(exp){
+    if (!confirm(`Delete "${exp.title}" (${money(exp.amount)})? This can't be undone.`)) return;
+    try{
+      await apiFetch('/expenses/' + exp.id, { method:'DELETE' });
+      showBanner('Entry deleted.', 'info');
+      loadAll();
+    }catch(err){
+      showBanner('Could not delete that entry (status ' + (err.status || '?') + ').');
+    }
+  }
+
+  // ---------- Filters & pagination ----------
+  $('btnApplyFilters').addEventListener('click', () => {
+    state.filters.category = $('f_category').value.trim();
+    state.filters.start_date = $('f_start').value;
+    state.filters.end_date = $('f_end').value;
+    state.limit = Math.min(100, Math.max(1, parseInt($('f_limit').value, 10) || 10));
+    state.skip = 0;
+    loadAll();
+  });
+
+  $('btnClearFilters').addEventListener('click', () => {
+    $('f_category').value = '';
+    $('f_start').value = '';
+    $('f_end').value = '';
+    $('f_limit').value = 10;
+    state.filters = { category:'', start_date:'', end_date:'' };
+    state.limit = 10;
+    state.skip = 0;
+    loadAll();
+  });
+
+  $('btnPrev').addEventListener('click', () => {
+    state.skip = Math.max(0, state.skip - state.limit);
+    loadList();
+  });
+
+  $('btnNext').addEventListener('click', () => {
+    state.skip = state.skip + state.limit;
+    loadList();
+  });
+
+  // ---------- Init ----------
+  (function init(){
+    const today = new Date().toISOString().slice(0,10);
+    $('c_date').value = today;
+    checkConnection();
+    loadAll();
+  })();
+
+})();
+</script>
+
+</body>
+</html>
