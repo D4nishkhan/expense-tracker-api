@@ -1,5 +1,5 @@
 """FastAPI application entrypoint for the Expense Tracker API."""
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
@@ -33,3 +33,6 @@ def root():
         "docs": "/docs",
         "version": settings.APP_VERSION,
     }
+@app.head("/", include_in_schema=False)
+def root_head():
+    return Response(status_code=200)
